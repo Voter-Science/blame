@@ -19,7 +19,6 @@ export class Transformer {
         let thisDelta = current;
         let thisValue: trc.ISheetContents = current.Value;
 
-        var app = current.App; // the app that made the change 
         var recIds: string[] = thisValue["RecId"];
         for (var i in recIds) {
 
@@ -30,7 +29,7 @@ export class Transformer {
             var thisRecord = previous.records[recId];
             thisRecord["xLastUser"] = thisDelta.User;
             thisRecord["xLastTimestamp"] = thisDelta.Timestamp;
-            //thisRecord[columnName]["currentValue"] = columnValue;
+            thisRecord["xApp"] = thisDelta.App;
 
             if (!previous.userEditCounts[thisDelta.User]) previous.userEditCounts[thisDelta.User] = 0;
             var userEditCounts = previous.userEditCounts;
@@ -38,16 +37,9 @@ export class Transformer {
             if (!previous.dailyEditCounts[deltaDayString]) previous.dailyEditCounts[deltaDayString] = 0;
             var dailyEditCounts = previous.dailyEditCounts;
 
-            if (thisDelta.GeoLat && thisDelta.GeoLong) {
-                // update location edit counter
-                var locationKey = "".concat(thisDelta.GeoLat, thisDelta.GeoLong);
-                if (!previous.locations[locationKey]) {
-                    previous.locations[locationKey] = { "count": 0 };
-                    previous.locations[locationKey]["coords"] = { "geoLat": thisDelta.GeoLat, "geoLong": thisDelta.GeoLong };
-                }
-                previous.locations[locationKey]["count"]++;
-            }
-
+            var xlat = thisDelta.GeoLat;
+            var xlong = thisDelta.GeoLong;
+            
             // loop thru columns in this delta
             for (let columnName in thisValue) {
                 if (columnName === "RecId") continue;
@@ -61,9 +53,21 @@ export class Transformer {
                     }
                 }
 
+                var columnValue = thisValue[columnName][i];
+
+                if (columnName == "XLastModified") { // client values take precedence
+                    thisRecord["xLastTimestamp"] = columnValue;
+                }
+                if (columnName == "XLat") {
+                    xlat = columnValue;
+                }
+                if (columnName == "XLong") {
+                    xlong = columnValue;
+                }
+
                 // assumes that the results are in ascending order, where the last 
                 // change is the most recent change and is, therefore, the current value
-                var columnValue = thisValue[columnName][i];
+                
                 thisRecord[columnName]["currentValue"] = columnValue;
                 let historyItem = Transformer.toHistoryItem(thisDelta, columnValue, deltaDayString);
                 thisRecord[columnName].changeHistory.push(historyItem);
@@ -88,6 +92,17 @@ export class Transformer {
                 // update daily edit counter
                 dailyEditCounts[deltaDayString]++;
             }
+
+            if (xlat && xlong) {
+                // update location edit counter
+                var locationKey = "".concat(xlat, xlong);
+                if (!previous.locations[locationKey]) {
+                    previous.locations[locationKey] = { "count": 0 };
+                    previous.locations[locationKey]["coords"] = { "geoLat": xlat, "geoLong": xlong };
+                }
+                previous.locations[locationKey]["count"]++;
+            }
+
         }
 
         return previous;

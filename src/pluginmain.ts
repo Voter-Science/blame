@@ -265,7 +265,7 @@ export class Blame {
         
         let fields = viewData.columnValueCounts;
 
-        let skip = ["Comments", "RecId"];
+        let skip = ["Comments", "RecId", "XLastModified", "XLat", "XLong"];
         for(let field in fields) {
             if (skip.indexOf(field)>-1) continue;
 
@@ -332,6 +332,7 @@ export class Blame {
 
         toReturn["xLastTimestamp"] = [];
         toReturn["xLastUser"] = [];
+        toReturn["xApp"] = [];
 
         let keysWeCareAbout = Object.keys(toReturn);
 
@@ -378,9 +379,15 @@ export class Blame {
         let xLastUserTh = document.createElement("th");
         xLastUserTh.innerHTML = "Last Changed By";
         header.appendChild(xLastUserTh);
+
         let xLastTimestampTh = document.createElement("th");
         xLastTimestampTh.innerHTML = "Last Changed On";
         header.appendChild(xLastTimestampTh);
+
+        let xAppTh = document.createElement("th");
+        xAppTh.innerHTML = "App";
+        header.appendChild(xAppTh);
+
 
         let tbody = document.createElement("tbody");
         table.appendChild(tbody);
@@ -420,9 +427,15 @@ export class Blame {
             let xLastUserTd = document.createElement("td");
             xLastUserTd.innerHTML = records[recId].xLastUser;
             tr.appendChild(xLastUserTd);
+
             let xLastTimestampTd = document.createElement("td");
             xLastTimestampTd.innerHTML = moment(records[recId].xLastTimestamp).format("M/D/YYYY h:m a");
             tr.appendChild(xLastTimestampTd);
+
+            let xAppTd = document.createElement("td");
+            xAppTd.innerHTML = records[recId].xApp;
+            tr.appendChild(xAppTd);
+
             tbody.appendChild(tr);
         }
 

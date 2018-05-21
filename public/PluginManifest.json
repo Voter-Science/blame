@@ -5,6 +5,6 @@
     "Author" :  "Romi",
     "Website" :  "https://github.com/Voter-Science/TRC-API-Samples",
     "Description": "blame reporting plugin. Get per-user edits, pivots, and download to csv.",        
-    "Version": "2.0.0", // User SemVer
+    "Version": "2.1.0", // User SemVer
     "Tags": [ "blame", "reports"  ]
 }
